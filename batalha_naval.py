@@ -10,8 +10,11 @@ def criar_tabuleiro():
 
 def exibir_tabuleiro(tabuleiro):
     cabecalho = "  "
-    for cont in range(20):
-        cabecalho += str(cont + 1).rjust(2) + " "
+    for i in range(20):
+        if i + 1 < 10:
+            cabecalho += f" {i + 1} "
+        else:
+            cabecalho += f"{i + 1} "
     print(cabecalho)
     for linha_index in range(20):
         letra = chr(65 + linha_index)
@@ -35,37 +38,40 @@ def navios_vivos(partes_restantes):
             return True
     return False 
 
-def verificar_navios(partes_restantes):
+def verificar_afundados(partes_restantes):
     for restante in partes_restantes:
-        if restante == 0:
-            return True
-    return False
+        if restante != 0:
+            return False
+    return True
 def informacoes(nome,quantidade,tamanho, pontuacoes_navios):
     tabela = []
     for navio in range(len(nome)):
         linha = [nome[navio],quantidade[navio],tamanho[navio],pontuacoes_navios[navio]]
         tabela.append(linha)
     return tabela
-    
+
+
 def posicionar_navio(tabuleiro, nome_navio,quantidade,tamanho,simbolo):
-    navios_posicionados = []
-    total_navios = 0
     for numero_navio in range(quantidade):
-        while total_navios < 13:
+        for posicoes_validas in range(100):
             exibir_tabuleiro(tabuleiro)
             posicao_navio = input(f"\n ==Em qual posição você deseja posiconar o(a) {nome_navio} #{numero_navio + 1} (EX: A10)==")
-            total_navios += 1
-            if posicao_navio in navios_posicionados:
-                print(f"O(A) {nome_navio} já foi posicionado na posição {posicao_navio}")
-                continue
-            
-            numero_navio + 1
+                
             linha = ord(posicao_navio[0]) - 65
             coluna = int(posicao_navio[1:]) - 1
-            navios_posicionados.append(posicao_navio)
             
             if coluna + tamanho > 20:
-                print("O Navio não cabe nestaa linha, tente novamente")
+                print("O Navio não cabe nesta linha, tente novamente")
+                continue
+            
+            sobreposicao = False
+            for deslocamento in range(tamanho):
+                if tabuleiro[linha][coluna + deslocamento] != "~" :
+                    sobreposicao = True
+                    break
+            
+            if sobreposicao:
+                print('Ja existe um navio nesta posição, tente novamente!')
                 continue
 
             for posicionamento_auto in range(tamanho):
@@ -74,7 +80,7 @@ def posicionar_navio(tabuleiro, nome_navio,quantidade,tamanho,simbolo):
 
 def atacar(tabuleiro_real,tabuleiro_ataque,pontuacao,partes_restantes,tamanhos_navios,nomes_navios,pontuacoes_navios):
     while navios_vivos(partes_restantes):
-        print("\n +-+-+-+ ATAQUE +-+-+-+")
+        print("\n +-+-+-+-+-+-+-+-+-+ ATAQUE +-+-+-+-+-+-+-+-+-+")
         exibir_tabuleiro(tabuleiro_ataque)
         coordenada = input("Escolha onde você irá atacar (EX: C11): ")
         letra = coordenada[0]
@@ -107,15 +113,22 @@ def atacar(tabuleiro_real,tabuleiro_ataque,pontuacao,partes_restantes,tamanhos_n
             tabuleiro_ataque[linha][coluna] = "O"
             print("Errou...Tente novamente!")
         
-        if verificar_navios(partes_restantes):
+        if verificar_afundados(partes_restantes):
             print("\n Todos os navios afundaram!!")
             print(f"Pontuação Final: {pontuacao[0]} pontos")
             break
-        
-        continuar = input("Deseja continuar jogando ? (S/N)")
+       
+        continuar = input("Deseja continuar jogando ? (S/N) ")
+        while continuar not in ("S", "N"):
+            print("Para continuar você deve digitar S ou N, tente novamente!")
+            continuar = input("Deseja continuar jogando ? (S/N) ")
+
         if continuar == "N":
             print(f"\n Jogo Encerrado pelo jogador")
             print(f"Pontuação Final: {pontuacao[0]} pontos")
+            return False
+            
+        
 
 def gerar_tabuleiro_teste():
     tabuleiro = criar_tabuleiro()
@@ -157,12 +170,13 @@ partes_restantes = [
 ]
 pontuacao = [0]
 escolha = ""
+
 print('Informações do Jogo:\n')
 informacoes_tabela = informacoes(nomes_navios,quantidades_navios,tamanhos_navios,pontuacoes_navios)
 print("Navios          | Quantidades | Tamanhos | Pontos")
 print("-" * 50)
 for linha in informacoes_tabela:
-    print(f"{linha[0]:15} | {linha[1]:^11} | {linha[2]:^8} | {linha[3]:^6}")     
+    print(f"{linha[0]:15} | {linha[1]:^11} | {linha[2]:^8} | {linha[3]:^6}\n")     
 while escolha !="0":
     print("=-=-=-=Escolha o modo de jogo:=-=-=-= \n")
     print("1 - Posicionar manualmente os navios")
@@ -185,41 +199,15 @@ while escolha !="0":
                 tamanhos_navios[indice_navio],
                 simbolos_navios[indice_navio]
             )
-        break
-    elif escolha == "1":
-         atacar(tabuleiro_real,tabuleiro_ataque,pontuacao,partes_restantes,tamanhos_navios,nomes_navios,pontuacoes_navios)   
+        break  
     elif escolha == "2":
         tabuleiro_real = gerar_tabuleiro_teste()
         print("\n Tabuleiro para testes gerado automaticamente!")
         exibir_tabuleiro(tabuleiro_real)
         break
-    elif escolha == "2":
-        atacar(tabuleiro_real,tabuleiro_ataque,pontuacao,partes_restantes,tamanhos_navios,nomes_navios,pontuacoes_navios)
     else:
         print("Opção Invalida, Escolha somente 1, 2 ou 0!")
-               
 
-
-
-
-
-
-            
-            # sobreposicao = False
-            # for deslocamento in range(tamanho):
-            #     if tabuleiro[linha][coluna + deslocamento] != "~":
-            #         sobreposicao = True
-            #         break
-            #     elif tabuleiro[linha][coluna + deslocamento] == "P":
-            #         sobreposicao = True
-            #         break
-            #     elif tabuleiro[linha][coluna + deslocamento] == "C":
-            #         sobreposicao = True
-            #         break
-            #     elif tabuleiro[linha][coluna + deslocamento] == "F":
-            #         sobreposicao = True
-            #         break
-                
-            
-            # if sobreposicao:
-            #     print('Ja existe um navio nesta posição, tente novamente!')
+while escolha == "1" or escolha == "2":
+    atacar(tabuleiro_real,tabuleiro_ataque,pontuacao,partes_restantes,tamanhos_navios,nomes_navios,pontuacoes_navios)
+    break
