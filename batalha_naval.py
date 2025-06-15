@@ -60,8 +60,12 @@ def posicionar_navio(tabuleiro, nome_navio,quantidade,tamanho,simbolo):
             linha = ord(posicao_navio[0]) - 65
             coluna = int(posicao_navio[1:]) - 1
             
+            if not (0 <= linha < 20 and 0 <= coluna <20):
+                print('Coordenada fora do tabuleiro!')
+                continue
+            
             if coluna + tamanho > 20:
-                print("O Navio não cabe nesta linha, tente novamente")
+                print("O Navio não cabe nesta linha, tente novamente!")
                 continue
             
             sobreposicao = False
